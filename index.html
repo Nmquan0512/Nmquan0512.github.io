@@ -579,6 +579,128 @@
             background: var(--error);
         }
 
+        /* Safari Browser Check Notification */
+        .safari-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(15px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .safari-warning.show {
+            display: flex;
+        }
+
+        .safari-warning-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-primary);
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+
+        .safari-warning-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.8), transparent);
+            animation: warningShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes warningShimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .safari-warning-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            animation: iconBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .safari-warning-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--warning), #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .safari-warning-message {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .safari-warning-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .safari-warning-btn {
+            background: linear-gradient(135deg, var(--warning), #f97316);
+            border: none;
+            border-radius: 16px;
+            padding: 14px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .safari-warning-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .safari-warning-btn.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .safari-warning-btn.secondary:hover {
+            background: var(--glass);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
         /* Responsive Design */
         @media (max-width: 480px) {
             .container {
@@ -606,6 +728,23 @@
             
             .stat-number {
                 font-size: 28px;
+            }
+
+            .safari-warning-card {
+                padding: 32px 24px;
+                margin: 20px;
+            }
+
+            .safari-warning-title {
+                font-size: 20px;
+            }
+
+            .safari-warning-message {
+                font-size: 14px;
+            }
+
+            .safari-warning-actions {
+                flex-direction: column;
             }
         }
 
@@ -704,7 +843,62 @@
         <span id="toastMessage">Thành công!</span>
     </div>
 
+    <!-- Safari Browser Warning -->
+    <div class="safari-warning" id="safariWarning">
+        <div class="safari-warning-card">
+            <div class="safari-warning-icon">🦁</div>
+            <h2 class="safari-warning-title">Yêu cầu Safari Browser</h2>
+            <p class="safari-warning-message">
+                Ứng dụng này chỉ hoạt động tốt nhất trên trình duyệt Safari.<br>
+                Vui lòng sử dụng Safari để có trải nghiệm tốt nhất.
+            </p>
+            <div class="safari-warning-actions">
+                <button class="safari-warning-btn secondary" onclick="hideSafariWarning()">
+                    <span>Tiếp tục với trình duyệt hiện tại</span>
+                </button>
+                <a href="https://www.apple.com/safari/" class="safari-warning-btn" target="_blank">
+                    <span>Tải Safari</span>
+                    <span>↗️</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Safari Browser Detection
+        function isSafariBrowser() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            return userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('crios') && !userAgent.includes('fxios');
+        }
+
+        // Safari Warning Management
+        function showSafariWarning() {
+            const safariWarning = document.getElementById('safariWarning');
+            safariWarning.classList.add('show');
+        }
+
+        function hideSafariWarning() {
+            const safariWarning = document.getElementById('safariWarning');
+            safariWarning.classList.remove('show');
+            // Store preference to not show again in this session
+            sessionStorage.setItem('safariWarningDismissed', 'true');
+        }
+
+        function checkSafariRequirement() {
+            // Don't show warning if already dismissed in this session
+            if (sessionStorage.getItem('safariWarningDismissed') === 'true') {
+                return;
+            }
+
+            // Show warning if not Safari
+            if (!isSafariBrowser()) {
+                // Delay showing warning to allow page to load
+                setTimeout(() => {
+                    showSafariWarning();
+                }, 1500);
+            }
+        }
+
         // Enhanced Device Detection
         function detectDevice() {
             const userAgent = navigator.userAgent.toLowerCase();
@@ -837,6 +1031,9 @@
 
         // Enhanced Page Initialization
         document.addEventListener('DOMContentLoaded', function() {
+            // Check Safari requirement first
+            checkSafariRequirement();
+            
             // Detect device
             detectDevice();
             
