@@ -669,7 +669,7 @@
             <div class="download-section">
                 <div class="url-container">
                     <input type="text" class="download-url" id="downloadUrl" 
-                           value="itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist" readonly>
+                           value="https://nmquan0512.github.io/manifest.plist" readonly>
                     <button class="copy-button" onclick="copyUrl()">
                         <span class="copy-icon"><i class="fas fa-copy"></i></span>
                     </button>
@@ -740,8 +740,11 @@
             const urlInput = document.getElementById('downloadUrl');
             const copyButton = document.querySelector('.copy-button');
             
+            // Create the full itms-services URL for copying
+            const fullUrl = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
+            
             try {
-                await navigator.clipboard.writeText(urlInput.value);
+                await navigator.clipboard.writeText(fullUrl);
                 showToast('✅', 'URL copied successfully!');
                 
                 // Button feedback
@@ -752,8 +755,12 @@
                 
             } catch (err) {
                 // Fallback
-                urlInput.select();
+                const textArea = document.createElement('textarea');
+                textArea.value = fullUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
                 document.execCommand('copy');
+                document.body.removeChild(textArea);
                 showToast('✅', 'URL copied to clipboard!');
             }
         }
