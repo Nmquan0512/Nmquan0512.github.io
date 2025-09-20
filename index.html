@@ -882,6 +882,8 @@
             safariWarning.classList.remove('show');
             // Store preference to not show again in this session
             sessionStorage.setItem('safariWarningDismissed', 'true');
+            // Show confirmation toast
+            showToast('✅', 'Bạn có thể tiếp tục sử dụng ứng dụng');
         }
 
         function checkSafariRequirement() {
@@ -963,6 +965,12 @@
         function downloadApp() {
             const loadingOverlay = document.getElementById('loadingOverlay');
             const userAgent = navigator.userAgent.toLowerCase();
+            
+            // Check if Safari warning is active and not dismissed
+            if (!isSafariBrowser() && sessionStorage.getItem('safariWarningDismissed') !== 'true') {
+                showToast('⚠️', 'Vui lòng sử dụng Safari để tải ứng dụng');
+                return;
+            }
             
             // Show loading
             loadingOverlay.classList.add('show');
