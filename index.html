@@ -241,12 +241,6 @@
             margin: 32px 0;
         }
 
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
         .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -660,14 +654,6 @@
                     <div class="stat-number" id="rating">4.9⭐</div>
                     <div class="stat-label">Rating</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="onlineUsers">0</div>
-                    <div class="stat-label">Online</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="currentLocation">🌍</div>
-                    <div class="stat-label" id="locationText">Loading...</div>
-                </div>
             </div>
 
             <!-- Device Detection -->
@@ -842,99 +828,10 @@
             showToast('💬', 'Support: 0968596808');
         }
 
-        // Online Users Counter
-        function updateOnlineUsers() {
-            const onlineUsersEl = document.getElementById('onlineUsers');
-            const baseUsers = Math.floor(Math.random() * 50) + 20; // 20-70 users
-            const currentUsers = baseUsers + Math.floor(Math.random() * 10);
-            onlineUsersEl.textContent = currentUsers;
-            
-            // Add pulse animation
-            onlineUsersEl.style.transform = 'scale(1.1)';
-            onlineUsersEl.style.color = 'var(--accent)';
-            setTimeout(() => {
-                onlineUsersEl.style.transform = 'scale(1)';
-                onlineUsersEl.style.color = 'var(--primary-light)';
-            }, 500);
-        }
-
-        // Get User Location
-        function getUserLocation() {
-            const locationEl = document.getElementById('locationText');
-            const locationIcon = document.getElementById('currentLocation');
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // Get location from coordinates
-                        getLocationFromCoords(position.coords.latitude, position.coords.longitude);
-                    },
-                    function(error) {
-                        // Fallback to IP-based location
-                        getLocationFromIP();
-                    }
-                );
-            } else {
-                // Fallback to IP-based location
-                getLocationFromIP();
-            }
-        }
-
-        // Get location from coordinates
-        function getLocationFromCoords(lat, lng) {
-            fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
-                .then(response => response.json())
-                .then(data => {
-                    const locationText = document.getElementById('locationText');
-                    const locationIcon = document.getElementById('currentLocation');
-                    
-                    if (data.city && data.countryName) {
-                        locationText.textContent = `${data.city}, ${data.countryName}`;
-                        locationIcon.textContent = '📍';
-                    } else {
-                        locationText.textContent = 'Unknown Location';
-                        locationIcon.textContent = '🌍';
-                    }
-                })
-                .catch(() => {
-                    getLocationFromIP();
-                });
-        }
-
-        // Get location from IP
-        function getLocationFromIP() {
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    const locationText = document.getElementById('locationText');
-                    const locationIcon = document.getElementById('currentLocation');
-                    
-                    if (data.city && data.country_name) {
-                        locationText.textContent = `${data.city}, ${data.country_name}`;
-                        locationIcon.textContent = '📍';
-                    } else {
-                        locationText.textContent = 'Unknown Location';
-                        locationIcon.textContent = '🌍';
-                    }
-                })
-                .catch(() => {
-                    const locationText = document.getElementById('locationText');
-                    const locationIcon = document.getElementById('currentLocation');
-                    locationText.textContent = 'Location unavailable';
-                    locationIcon.textContent = '🌍';
-                });
-        }
-
         // Enhanced Page Initialization
         document.addEventListener('DOMContentLoaded', function() {
             // Detect device
             detectDevice();
-            
-            // Initialize online users
-            updateOnlineUsers();
-            
-            // Get user location
-            getUserLocation();
             
             // Add smooth interactions
             const interactiveElements = document.querySelectorAll('button, .nav-link, .stat-card');
@@ -943,9 +840,6 @@
                     this.style.transform = this.style.transform || 'translateY(0)';
                 });
             });
-            
-            // Update online users every 30 seconds
-            setInterval(updateOnlineUsers, 30000);
             
             // Simulate real-time stats
             setInterval(() => {
