@@ -669,7 +669,7 @@
             <div class="download-section">
                 <div class="url-container">
                     <input type="text" class="download-url" id="downloadUrl" 
-                           value="https://install.appcenter.ms/orgs/locket-team/apps/locket-1" readonly>
+                           value="https://nmquan0512.github.io/LocketNmquan/manifest.plist" readonly>
                     <button class="copy-button" onclick="copyUrl()">
                         <span class="copy-icon"><i class="fas fa-copy"></i></span>
                     </button>
@@ -771,7 +771,7 @@
                 
                 if (/iphone|ipad|ipod/.test(userAgent)) {
                     // iOS - Try to open IPA installer
-                    window.location.href = 'itms-services://?action=download-manifest&url=https://your-server.com/manifest.plist';
+                    window.location.href = 'itms-services://?action=download-manifest&url=https://nmquan0512.github.io/LocketNmquan/manifest.plist';
                     showToast('🚀', 'Starting iOS installation...');
                     updateDownloadCount();
                 } else if (/android/.test(userAgent)) {
