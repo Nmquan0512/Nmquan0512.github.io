@@ -771,7 +771,7 @@
                 
                 if (/iphone|ipad|ipod/.test(userAgent)) {
                     // iOS - Try to open IPA installer
-                    window.location.href = 'itms-services://?action=download-manifest&url=https://nmquan0512.github.io/LocketNmquan/manifest.plist';
+                    window.location.href = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
                     showToast('🚀', 'Starting iOS installation...');
                     updateDownloadCount();
                 } else if (/android/.test(userAgent)) {
