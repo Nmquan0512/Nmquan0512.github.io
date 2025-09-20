@@ -659,10 +659,10 @@
             <!-- Device Detection -->
             <div class="device-panel" id="devicePanel">
                 <div class="device-icon" id="deviceIcon">📱</div>
-                <div class="device-info">
-                    <h3>Thiết bị sử dụng</h3>
-                    <p id="deviceType">Đang quét...</p>
-                </div>
+                 <div class="device-info">
+                     <h3>Thiết bị sử dụng</h3>
+                     <p id="deviceType">Đang kiểm tra...</p>
+                 </div>
             </div>
 
             <!-- Download Section -->
@@ -712,27 +712,27 @@
             const deviceIcon = document.getElementById('deviceIcon');
             const deviceType = document.getElementById('deviceType');
             
-            if (/iphone|ipad|ipod/.test(userAgent)) {
-                deviceIcon.textContent = '📱';
-                deviceType.textContent = 'iOS Device - Compatible ✓';
-                devicePanel.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            } else if (/android/.test(userAgent)) {
-                deviceIcon.textContent = '🤖';
-                deviceType.textContent = 'Android - Limited Support';
-                devicePanel.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-            } else if (/windows/.test(userAgent)) {
-                deviceIcon.textContent = '💻';
-                deviceType.textContent = 'Windows PC - Use iOS Simulator';
-                devicePanel.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
-            } else if (/mac/.test(userAgent)) {
-                deviceIcon.textContent = '💻';
-                deviceType.textContent = 'macOS - Use Xcode Simulator';
-                devicePanel.style.background = 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
-            } else {
-                deviceIcon.textContent = '❓';
-                deviceType.textContent = 'Unknown Device';
-                devicePanel.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
-            }
+             if (/iphone|ipad|ipod/.test(userAgent)) {
+                 deviceIcon.textContent = '📱';
+                 deviceType.textContent = 'iPhone/iPad iOS - Tương thích ✓';
+                 devicePanel.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+             } else if (/android/.test(userAgent)) {
+                 deviceIcon.textContent = '🤖';
+                 deviceType.textContent = 'Android - Hỗ trợ hạn chế';
+                 devicePanel.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+             } else if (/windows/.test(userAgent)) {
+                 deviceIcon.textContent = '💻';
+                 deviceType.textContent = 'Windows PC - Dùng iOS Simulator';
+                 devicePanel.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
+             } else if (/mac/.test(userAgent)) {
+                 deviceIcon.textContent = '💻';
+                 deviceType.textContent = 'macOS - Dùng Xcode Simulator';
+                 devicePanel.style.background = 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+             } else {
+                 deviceIcon.textContent = '❓';
+                 deviceType.textContent = 'Thiết bị không xác định';
+                 devicePanel.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+             }
         }
 
         // Enhanced Copy Function
@@ -743,26 +743,26 @@
             // Create the full itms-services URL for copying
             const fullUrl = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
             
-            try {
-                await navigator.clipboard.writeText(fullUrl);
-                showToast('✅', 'URL copied successfully!');
-                
-                // Button feedback
-                copyButton.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    copyButton.style.transform = 'scale(1)';
-                }, 150);
-                
-            } catch (err) {
-                // Fallback
-                const textArea = document.createElement('textarea');
-                textArea.value = fullUrl;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showToast('✅', 'URL copied to clipboard!');
-            }
+             try {
+                 await navigator.clipboard.writeText(fullUrl);
+                 showToast('✅', 'Đã sao chép URL thành công!');
+                 
+                 // Button feedback
+                 copyButton.style.transform = 'scale(0.9)';
+                 setTimeout(() => {
+                     copyButton.style.transform = 'scale(1)';
+                 }, 150);
+                 
+             } catch (err) {
+                 // Fallback
+                 const textArea = document.createElement('textarea');
+                 textArea.value = fullUrl;
+                 document.body.appendChild(textArea);
+                 textArea.select();
+                 document.execCommand('copy');
+                 document.body.removeChild(textArea);
+                 showToast('✅', 'Đã sao chép URL vào clipboard!');
+             }
         }
 
         // Smart Download Function
@@ -776,16 +776,16 @@
             setTimeout(() => {
                 loadingOverlay.classList.remove('show');
                 
-                if (/iphone|ipad|ipod/.test(userAgent)) {
-                    // iOS - Try to open IPA installer
-                    window.location.href = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
-                    showToast('🚀', 'Đang tải...');
-                    updateDownloadCount();
-                } else if (/android/.test(userAgent)) {
-                    showToast('⚠️', 'Android support coming soon!');
-                } else {
-                    showToast('💡', 'Please use an iOS device for installation');
-                }
+                 if (/iphone|ipad|ipod/.test(userAgent)) {
+                     // iOS - Try to open IPA installer
+                     window.location.href = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
+                     showToast('🚀', 'Đang bắt đầu cài đặt iOS...');
+                     updateDownloadCount();
+                 } else if (/android/.test(userAgent)) {
+                     showToast('⚠️', 'Hỗ trợ Android sắp ra mắt!');
+                 } else {
+                     showToast('💡', 'Vui lòng sử dụng thiết bị iOS để cài đặt');
+                 }
             }, 2000);
         }
 
@@ -831,9 +831,9 @@
 
 
 
-        function showSupport() {
-            showToast('💬', 'Support: 0968596808');
-        }
+         function showSupport() {
+             showToast('💬', 'Hỗ trợ: 0968596808');
+         }
 
         // Enhanced Page Initialization
         document.addEventListener('DOMContentLoaded', function() {
@@ -865,15 +865,15 @@
             });
         });
 
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement.id === 'downloadUrl') {
-                setTimeout(() => showToast('✅', 'URL copied!'), 100);
-            }
-            if (e.key === 'Enter' && e.target.tagName === 'BUTTON') {
-                e.target.click();
-            }
-        });
+         // Add keyboard shortcuts
+         document.addEventListener('keydown', function(e) {
+             if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement.id === 'downloadUrl') {
+                 setTimeout(() => showToast('✅', 'Đã sao chép URL!'), 100);
+             }
+             if (e.key === 'Enter' && e.target.tagName === 'BUTTON') {
+                 e.target.click();
+             }
+         });
     </script>
 </body>
 </html>
