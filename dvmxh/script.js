@@ -15,6 +15,7 @@ let filteredServices = [];
 let currentView = 'grid';
 let usdToVndRate = 27000; // Tỷ giá USD to VNĐ (có thể cập nhật từ API)
 let showCurrency = 'USD'; // 'USD' hoặc 'VND'
+let translateToVietnamese = true; // Bật/tắt dịch sang tiếng Việt
 
 // DOM elements
 const servicesList = document.getElementById('servicesList');
@@ -210,7 +211,6 @@ async function loadServices() {
         
         // Kiểm tra response có hợp lệ không
         if (data && Array.isArray(data)) {
-            allServices = data;
             console.log('API trả về', data.length, 'dịch vụ');
             
             // Debug: Log cấu trúc dữ liệu mẫu
@@ -221,6 +221,9 @@ async function loadServices() {
                 console.log('🏷️ Các loại có sẵn (service_type):', [...new Set(data.map(s => s.service_type))]);
                 console.log('🔍 Tất cả keys của dịch vụ đầu tiên:', Object.keys(data[0]));
             }
+            
+            // Dịch sang tiếng Việt nếu bật
+            allServices = await translateServices(data);
         } else {
             console.warn('API response không đúng định dạng:', data);
             allServices = [];
@@ -483,8 +486,229 @@ window.APIUtils = {
     getExchangeRate: () => usdToVndRate
 };
 
-// Make forceRefresh available globally
+// Translation functions
+async function translateText(text, targetLang = 'vi') {
+    if (!translateToVietnamese || !text) return text;
+    
+    try {
+        // Sử dụng Google Translate API (free tier)
+        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+        const data = await response.json();
+        
+        if (data && data[0] && data[0][0]) {
+            return data[0][0][0];
+        }
+        return text;
+    } catch (error) {
+        console.warn('Không thể dịch:', text, error);
+        return text;
+    }
+}
+
+// Cache translations để tránh dịch lại
+const translationCache = new Map();
+
+// Dictionary dịch nhanh cho các từ thường dùng
+const quickTranslateDict = {
+    // Social Media
+    'Facebook': 'Facebook',
+    'Instagram': 'Instagram', 
+    'Twitter': 'Twitter',
+    'TikTok': 'TikTok',
+    'YouTube': 'YouTube',
+    'Discord': 'Discord',
+    'Telegram': 'Telegram',
+    'WhatsApp': 'WhatsApp',
+    'Snapchat': 'Snapchat',
+    'LinkedIn': 'LinkedIn',
+    'Pinterest': 'Pinterest',
+    'Reddit': 'Reddit',
+    
+    // Services
+    'Followers': 'Người theo dõi',
+    'Likes': 'Lượt thích',
+    'Views': 'Lượt xem',
+    'Comments': 'Bình luận',
+    'Shares': 'Chia sẻ',
+    'Subscribers': 'Người đăng ký',
+    'Members': 'Thành viên',
+    'Reactions': 'Phản ứng',
+    'Retweets': 'Retweet',
+    'Hearts': 'Trái tim',
+    'Stars': 'Sao',
+    'Diamonds': 'Kim cương',
+    'Coins': 'Xu',
+    'UC': 'UC',
+    'Premium': 'Cao cấp',
+    'High Quality': 'Chất lượng cao',
+    'Instant': 'Ngay lập tức',
+    'Fast': 'Nhanh',
+    'Slow': 'Chậm',
+    'Real': 'Thật',
+    'Active': 'Hoạt động',
+    'Organic': 'Tự nhiên',
+    'Targeted': 'Mục tiêu',
+    
+    // Time
+    'Hours': 'Giờ',
+    'Days': 'Ngày',
+    'Weeks': 'Tuần',
+    'Months': 'Tháng',
+    'Years': 'Năm',
+    'Min': 'Tối thiểu',
+    'Max': 'Tối đa',
+    'Start': 'Bắt đầu',
+    'Speed': 'Tốc độ',
+    'Refill': 'Bảo hành',
+    
+    // Status
+    'Online': 'Trực tuyến',
+    'Offline': 'Ngoại tuyến',
+    'Available': 'Có sẵn',
+    'Unavailable': 'Không có sẵn',
+    'Completed': 'Hoàn thành',
+    'Processing': 'Đang xử lý',
+    'Pending': 'Chờ xử lý',
+    'Failed': 'Thất bại',
+    'Success': 'Thành công',
+    
+    // Categories
+    'Social Media': 'Mạng xã hội',
+    'Entertainment': 'Giải trí',
+    'Gaming': 'Trò chơi',
+    'Business': 'Kinh doanh',
+    'Education': 'Giáo dục',
+    'Technology': 'Công nghệ'
+};
+
+// Quick translate function
+function quickTranslate(text) {
+    if (!text) return text;
+    
+    let translated = text;
+    
+    // Replace common words/phrases
+    Object.keys(quickTranslateDict).forEach(english => {
+        const regex = new RegExp(`\\b${english}\\b`, 'gi');
+        translated = translated.replace(regex, quickTranslateDict[english]);
+    });
+    
+    return translated;
+}
+
+async function translateWithCache(text, targetLang = 'vi') {
+    if (!translateToVietnamese || !text) return text;
+    
+    const cacheKey = `${text}_${targetLang}`;
+    if (translationCache.has(cacheKey)) {
+        return translationCache.get(cacheKey);
+    }
+    
+    // Thử dịch nhanh trước
+    const quickTranslated = quickTranslate(text);
+    if (quickTranslated !== text) {
+        translationCache.set(cacheKey, quickTranslated);
+        return quickTranslated;
+    }
+    
+    // Nếu không có trong dictionary, dùng Google Translate
+    const translated = await translateText(text, targetLang);
+    translationCache.set(cacheKey, translated);
+    return translated;
+}
+
+// Translate service data
+async function translateServiceData(service) {
+    if (!translateToVietnamese) return service;
+    
+    const translatedService = { ...service };
+    
+    // Dịch tên dịch vụ
+    if (service.name) {
+        translatedService.name = await translateWithCache(service.name);
+    }
+    
+    // Dịch mô tả nếu có
+    if (service.description) {
+        translatedService.description = await translateWithCache(service.description);
+    }
+    
+    // Dịch category nếu có
+    if (service.category) {
+        translatedService.category = await translateWithCache(service.category);
+    }
+    
+    return translatedService;
+}
+
+// Batch translate services
+async function translateServices(services) {
+    if (!translateToVietnamese) return services;
+    
+    console.log('🔄 Đang dịch', services.length, 'dịch vụ sang tiếng Việt...');
+    
+    // Show loading message
+    if (servicesList) {
+        servicesList.innerHTML = `
+            <div class="loading">
+                <i class="fas fa-language fa-spin"></i>
+                <span>Đang dịch ${services.length} dịch vụ sang tiếng Việt...</span>
+                <div style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">
+                    Vui lòng chờ trong giây lát...
+                </div>
+            </div>
+        `;
+    }
+    
+    const translatedServices = [];
+    for (let i = 0; i < services.length; i++) {
+        const service = services[i];
+        const translatedService = await translateServiceData(service);
+        translatedServices.push(translatedService);
+        
+        // Update loading message every 10 services
+        if ((i + 1) % 10 === 0) {
+            console.log(`📝 Đã dịch ${i + 1}/${services.length} dịch vụ`);
+            if (servicesList) {
+                servicesList.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-language fa-spin"></i>
+                        <span>Đang dịch ${i + 1}/${services.length} dịch vụ...</span>
+                        <div style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">
+                            Hoàn thành ${Math.round((i + 1) / services.length * 100)}%
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    console.log('✅ Hoàn thành dịch thuật!');
+    return translatedServices;
+}
+
+// Toggle translation
+function toggleTranslation() {
+    translateToVietnamese = !translateToVietnamese;
+    console.log('🌐 Dịch thuật:', translateToVietnamese ? 'BẬT' : 'TẮT');
+    
+    // Update button text
+    const translateTextEl = document.getElementById('translateText');
+    if (translateTextEl) {
+        translateTextEl.textContent = translateToVietnamese ? 'Tắt dịch' : 'Bật dịch';
+    }
+    
+    // Clear translation cache when toggling
+    translationCache.clear();
+    
+    // Reload services with new translation setting
+    loadServices();
+}
+
+// Make functions available globally
 window.forceRefresh = forceRefresh;
+window.toggleTranslation = toggleTranslation;
+window.translateText = translateText;
 
 // Test function để kiểm tra tính toán
 window.testCalculation = function(price = 19.47) {
