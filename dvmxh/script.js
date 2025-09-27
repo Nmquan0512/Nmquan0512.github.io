@@ -13,7 +13,7 @@ const API_CONFIG = {
 let allServices = [];
 let filteredServices = [];
 let currentView = 'grid';
-let usdToVndRate = 24500; // Tỷ giá USD to VNĐ (có thể cập nhật từ API)
+let usdToVndRate = 27000; // Tỷ giá USD to VNĐ (có thể cập nhật từ API)
 let showCurrency = 'USD'; // 'USD' hoặc 'VND'
 
 // DOM elements
@@ -48,7 +48,9 @@ function formatCurrency(amount, currency = showCurrency) {
     
     if (currency === 'VND') {
         const vndAmount = convertUSDToVND(markupAmount);
-        return vndAmount.toLocaleString('vi-VN') + ' ₫';
+        // Làm tròn VND (bỏ phần thập phân)
+        const roundedVnd = Math.round(vndAmount);
+        return roundedVnd.toLocaleString('vi-VN') + ' ₫';
     } else {
         return '$' + markupAmount.toFixed(2);
     }
@@ -77,7 +79,7 @@ async function loadExchangeRate() {
         // usdToVndRate = data.rates.VND;
         
         // Hiện tại sử dụng tỷ giá cố định
-        usdToVndRate = 24500;
+        usdToVndRate = 27000;
         console.log('Tỷ giá USD/VNĐ:', usdToVndRate);
         
         // Cập nhật hiển thị tỷ giá
