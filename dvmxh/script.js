@@ -20,7 +20,7 @@ let showCurrency = 'USD'; // 'USD' hoặc 'VND'
 const servicesList = document.getElementById('servicesList');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
-const typeFilter = document.getElementById('typeFilter');
+// const typeFilter = document.getElementById('typeFilter'); // Đã bỏ lọc loại
 const refillFilter = document.getElementById('refillFilter');
 const rateFilter = document.getElementById('rateFilter');
 const minFilter = document.getElementById('minFilter');
@@ -115,13 +115,12 @@ function forceRefresh() {
     window.location.reload(true);
 }
 
-// Update category and type dropdowns from API data
+// Update category dropdown from API data (đã bỏ lọc loại)
 function updateCategoryDropdowns() {
     if (allServices.length === 0) return;
     
-    // Get unique categories and types
+    // Get unique categories
     const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
-    const types = [...new Set(allServices.map(s => s.type || s.service_type).filter(Boolean))];
     
     // Update category dropdown
     if (categoryFilter) {
@@ -137,21 +136,7 @@ function updateCategoryDropdowns() {
         });
     }
     
-    // Update type dropdown
-    if (typeFilter) {
-        const currentValue = typeFilter.value;
-        typeFilter.innerHTML = '<option value="">Tất cả</option>';
-        
-        types.sort().forEach(type => {
-            const option = document.createElement('option');
-            option.value = type;
-            option.textContent = type;
-            if (type === currentValue) option.selected = true;
-            typeFilter.appendChild(option);
-        });
-    }
-    
-    console.log('Đã cập nhật dropdown với', categories.length, 'danh mục và', types.length, 'loại');
+    console.log('Đã cập nhật dropdown với', categories.length, 'danh mục');
 }
 
 // Initialize app
@@ -184,7 +169,7 @@ function setupEventListeners() {
     
     // Filter inputs
     categoryFilter.addEventListener('change', applyFilters);
-    typeFilter.addEventListener('change', applyFilters);
+    // typeFilter.addEventListener('change', applyFilters); // Đã bỏ lọc loại
     refillFilter.addEventListener('change', applyFilters);
     rateFilter.addEventListener('input', debounce(applyFilters, 300));
     minFilter.addEventListener('input', debounce(applyFilters, 300));
@@ -270,7 +255,7 @@ async function loadServices() {
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase().trim();
     const category = categoryFilter.value;
-    const type = typeFilter.value;
+    // const type = typeFilter.value; // Đã bỏ lọc loại
     const refill = refillFilter.value;
     const maxRate = parseFloat(rateFilter.value) || Infinity;
     const maxMin = parseInt(minFilter.value) || Infinity;
@@ -287,10 +272,10 @@ function applyFilters() {
             return false;
         }
         
-        // Type filter - kiểm tra cả service.type và service.service_type
-        if (type && service.type !== type && service.service_type !== type) {
-            return false;
-        }
+        // Type filter - ĐÃ BỎ LỌC LOẠI
+        // if (type && service.type !== type && service.service_type !== type) {
+        //     return false;
+        // }
         
         // Refill filter
         if (refill && service.refill.toString() !== refill) {
@@ -323,7 +308,7 @@ function applyFilters() {
 function clearAllFilters() {
     searchInput.value = '';
     categoryFilter.value = '';
-    typeFilter.value = '';
+    // typeFilter.value = ''; // Đã bỏ lọc loại
     refillFilter.value = '';
     rateFilter.value = '';
     minFilter.value = '';
