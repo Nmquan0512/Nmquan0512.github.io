@@ -353,33 +353,42 @@ function renderServices() {
     servicesList.innerHTML = servicesHTML;
 }
 
-// Create service card HTML
+// Thay thế hàm createServiceCard hiện tại
 function createServiceCard(service) {
     const isListView = currentView === 'list';
+    
+    // Safe number formatting để tránh lỗi
+    const safeMin = parseInt(service.min) || 0;
+    const safeMax = parseInt(service.max) || 0;
+    
+    // Truncate tên service nếu quá dài
+    const serviceName = service.name.length > 50 
+        ? service.name.substring(0, 50) + '...' 
+        : service.name;
     
     return `
         <div class="service-card ${isListView ? 'list-view' : ''}">
             <div class="service-id">#${service.service}</div>
             <div class="service-info">
-                <h3 class="service-name">${service.name}</h3>
+                <h3 class="service-name">${serviceName}</h3>
                 <div class="service-badges">
                     <span class="service-type">${service.type || service.service_type || 'N/A'}</span>
                     <span class="service-category">${service.category || 'N/A'}</span>
                 </div>
                 <div class="service-rate">${formatCurrency(service.rate)}</div>
-                <div class="service-range">Min: ${parseInt(service.min).toLocaleString()} - Max: ${parseInt(service.max).toLocaleString()}</div>
+                <div class="service-range">Min: ${safeMin.toLocaleString()} - Max: ${safeMax.toLocaleString()}</div>
                 <div class="service-meta">
                     <div class="service-meta-item">
                         <i class="fas ${showCurrency === 'VND' ? 'fa-dong-sign' : 'fa-dollar-sign'}"></i>
-                        <span class="price-text">Giá: ${formatCurrency(service.rate)}</span>
+                        <span class="price-text">${formatCurrency(service.rate)}</span>
                     </div>
                     <div class="service-meta-item">
                         <i class="fas fa-arrow-up"></i>
-                        <span>Từ ${parseInt(service.min).toLocaleString()}</span>
+                        <span>Từ ${safeMin.toLocaleString()}</span>
                     </div>
                     <div class="service-meta-item">
                         <i class="fas fa-arrow-down"></i>
-                        <span>Đến ${parseInt(service.max).toLocaleString()}</span>
+                        <span>Đến ${safeMax.toLocaleString()}</span>
                     </div>
                 </div>
                 <div class="refill-badge ${service.refill}">
