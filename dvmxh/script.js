@@ -46,12 +46,16 @@ function formatCurrency(amount, currency = showCurrency) {
     // Thêm markup 25% cho giá
     const markupAmount = numAmount * 1.25;
     
+    console.log(`💱 FormatCurrency: ${numAmount} → ${markupAmount} (markup 25%)`);
+    
     if (currency === 'VND') {
         const vndAmount = convertUSDToVND(markupAmount);
         // Làm tròn VND (bỏ phần thập phân)
         const roundedVnd = Math.round(vndAmount);
+        console.log(`🇻🇳 VND: ${markupAmount} USD × ${usdToVndRate} = ${vndAmount} → ${roundedVnd} ₫`);
         return roundedVnd.toLocaleString('vi-VN') + ' ₫';
     } else {
+        console.log(`🇺🇸 USD: $${markupAmount.toFixed(2)}`);
         return '$' + markupAmount.toFixed(2);
     }
 }
@@ -93,7 +97,17 @@ async function loadExchangeRate() {
 function updateExchangeRateDisplay() {
     if (exchangeRateEl) {
         exchangeRateEl.textContent = `1 USD = ${usdToVndRate.toLocaleString('vi-VN')} ₫`;
+        console.log('🔄 Cập nhật hiển thị tỷ giá:', exchangeRateEl.textContent);
     }
+}
+
+// Force refresh để clear cache
+function forceRefresh() {
+    console.log('🔄 Force refresh - Clear cache...');
+    // Clear localStorage
+    localStorage.clear();
+    // Reload page
+    window.location.reload(true);
 }
 
 // Update category and type dropdowns from API data
@@ -137,6 +151,9 @@ function updateCategoryDropdowns() {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Khởi tạo ứng dụng...');
+    console.log('💰 Tỷ giá ban đầu:', usdToVndRate);
+    
     loadCurrencyPreference();
     initializeApp();
     setupEventListeners();
@@ -466,9 +483,13 @@ window.APIUtils = {
     getMarkupPrice,
     getOriginalPrice,
     updateCategoryDropdowns,
+    forceRefresh,
     getFilteredServices: () => filteredServices,
     getAllServices: () => allServices,
     getAPIConfig: () => API_CONFIG,
     getCurrentCurrency: () => showCurrency,
     getExchangeRate: () => usdToVndRate
 };
+
+// Make forceRefresh available globally
+window.forceRefresh = forceRefresh;
