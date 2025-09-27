@@ -77,19 +77,24 @@ function getCurrencySymbol(currency = showCurrency) {
 // Load exchange rate from API (optional)
 async function loadExchangeRate() {
     try {
-        // Có thể sử dụng API tỷ giá thực tế
-        // const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        // const data = await response.json();
-        // usdToVndRate = data.rates.VND;
+        // Sử dụng API tỷ giá thực tế
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await response.json();
         
-        // Hiện tại sử dụng tỷ giá cố định
-        usdToVndRate = 27000;
-        console.log('Tỷ giá USD/VNĐ:', usdToVndRate);
+        if (data && data.rates && data.rates.VND) {
+            usdToVndRate = Math.round(data.rates.VND);
+            console.log('✅ Tỷ giá thực từ API:', usdToVndRate, 'VND/USD');
+        } else {
+            throw new Error('API không trả về tỷ giá VND');
+        }
         
         // Cập nhật hiển thị tỷ giá
         updateExchangeRateDisplay();
     } catch (error) {
-        console.warn('Không thể cập nhật tỷ giá, sử dụng tỷ giá mặc định:', usdToVndRate);
+        console.warn('❌ Không thể lấy tỷ giá từ API, sử dụng tỷ giá mặc định:', usdToVndRate);
+        // Fallback to default rate
+        usdToVndRate = 27000;
+        updateExchangeRateDisplay();
     }
 }
 
@@ -493,3 +498,31 @@ window.APIUtils = {
 
 // Make forceRefresh available globally
 window.forceRefresh = forceRefresh;
+
+// Test function để kiểm tra tính toán
+window.testCalculation = function(price = 19.47) {
+    console.log('🧮 TEST TÍNH TOÁN:');
+    console.log('Giá gốc API:', price);
+    
+    const markup = price * 1.25;
+    console.log('Sau markup 25%:', markup);
+    
+    const vndAmount = markup * usdToVndRate;
+    console.log('Chuyển VND (×' + usdToVndRate + '):', vndAmount);
+    
+    const rounded = Math.round(vndAmount);
+    console.log('Làm tròn:', rounded);
+    
+    const formatted = rounded.toLocaleString('vi-VN') + ' ₫';
+    console.log('Format hiển thị:', formatted);
+    
+    console.log('Tỷ giá hiện tại:', usdToVndRate);
+    console.log('Đơn vị tiền tệ:', showCurrency);
+    
+    return {
+        original: price,
+        markup: markup,
+        vnd: rounded,
+        formatted: formatted
+    };
+};
