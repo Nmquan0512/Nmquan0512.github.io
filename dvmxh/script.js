@@ -134,6 +134,8 @@ const API_CONFIG = {
 let allServices = [...sampleServices];
 let filteredServices = [...sampleServices];
 let currentView = 'grid';
+let usdToVndRate = 24500; // Tỷ giá USD to VNĐ (có thể cập nhật từ API)
+let showCurrency = 'USD'; // 'USD' hoặc 'VND'
 
 // DOM elements
 const servicesList = document.getElementById('servicesList');
@@ -151,11 +153,61 @@ const loading = document.getElementById('loading');
 const totalServicesEl = document.getElementById('totalServices');
 const visibleServicesEl = document.getElementById('visibleServices');
 const avgRateEl = document.getElementById('avgRate');
+const toggleCurrencyBtn = document.getElementById('toggleCurrency');
+const currencyTextEl = document.getElementById('currencyText');
+const exchangeRateEl = document.getElementById('exchangeRate');
+
+// Currency conversion functions
+function convertUSDToVND(usdAmount) {
+    return Math.round(parseFloat(usdAmount) * usdToVndRate);
+}
+
+function formatCurrency(amount, currency = showCurrency) {
+    const numAmount = parseFloat(amount);
+    if (currency === 'VND') {
+        const vndAmount = convertUSDToVND(numAmount);
+        return vndAmount.toLocaleString('vi-VN') + ' ₫';
+    } else {
+        return '$' + numAmount.toFixed(2);
+    }
+}
+
+function getCurrencySymbol(currency = showCurrency) {
+    return currency === 'VND' ? '₫' : '$';
+}
+
+// Load exchange rate from API (optional)
+async function loadExchangeRate() {
+    try {
+        // Có thể sử dụng API tỷ giá thực tế
+        // const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        // const data = await response.json();
+        // usdToVndRate = data.rates.VND;
+        
+        // Hiện tại sử dụng tỷ giá cố định
+        usdToVndRate = 24500;
+        console.log('Tỷ giá USD/VNĐ:', usdToVndRate);
+        
+        // Cập nhật hiển thị tỷ giá
+        updateExchangeRateDisplay();
+    } catch (error) {
+        console.warn('Không thể cập nhật tỷ giá, sử dụng tỷ giá mặc định:', usdToVndRate);
+    }
+}
+
+// Update exchange rate display
+function updateExchangeRateDisplay() {
+    if (exchangeRateEl) {
+        exchangeRateEl.textContent = `1 USD = ${usdToVndRate.toLocaleString('vi-VN')} ₫`;
+    }
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
+    loadCurrencyPreference();
     initializeApp();
     setupEventListeners();
+    loadExchangeRate();
     loadServices();
 });
 
@@ -166,6 +218,9 @@ function initializeApp() {
     // Set initial view
     servicesList.classList.add('grid-view');
     gridViewBtn.classList.add('active');
+    
+    // Update currency button text
+    updateCurrencyButton();
 }
 
 function setupEventListeners() {
@@ -186,36 +241,60 @@ function setupEventListeners() {
     // View controls
     gridViewBtn.addEventListener('click', () => switchView('grid'));
     listViewBtn.addEventListener('click', () => switchView('list'));
+    
+    // Currency toggle
+    toggleCurrencyBtn.addEventListener('click', toggleCurrency);
 }
 
-// Load services from API (currently using sample data)
+// Load services from real API
 async function loadServices() {
     try {
         loading.style.display = 'block';
         
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Tạo form data cho API request
+        const formData = new FormData();
+        formData.append('key', API_CONFIG.key);
+        formData.append('action', 'services');
         
-        // In real implementation, this would be:
-        // const response = await fetch(`${API_CONFIG.url}/services`, {
-        //     method: API_CONFIG.method,
-        //     headers: {
-        //         'Content-Type': API_CONFIG.contentType,
-        //         'Authorization': `Bearer ${API_CONFIG.key}`
-        //     }
-        // });
-        // const data = await response.json();
-        // allServices = data.services || [];
+        // Gọi API thực
+        const response = await fetch(API_CONFIG.url, {
+            method: API_CONFIG.method,
+            body: formData
+        });
         
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Kiểm tra response có hợp lệ không
+        if (data && Array.isArray(data)) {
+            allServices = data;
+        } else {
+            console.warn('API response không đúng định dạng, sử dụng dữ liệu mẫu');
+            allServices = [...sampleServices];
+        }
+        
+        filteredServices = [...allServices];
+        
+        renderServices();
+        updateStats();
+        
+        console.log('Đã tải thành công', allServices.length, 'dịch vụ từ API');
+        
+    } catch (error) {
+        console.error('Error loading services from API:', error);
+        console.log('Sử dụng dữ liệu mẫu thay thế');
+        
+        // Fallback to sample data nếu API lỗi
         allServices = [...sampleServices];
         filteredServices = [...allServices];
         
         renderServices();
         updateStats();
         
-    } catch (error) {
-        console.error('Error loading services:', error);
-        showError('Không thể tải danh sách dịch vụ. Vui lòng thử lại sau.');
+        showError(`Không thể kết nối API: ${error.message}. Đang sử dụng dữ liệu mẫu.`);
     } finally {
         loading.style.display = 'none';
     }
@@ -336,12 +415,12 @@ function createServiceCard(service) {
                     <span class="service-type">${service.type}</span>
                     <span class="service-category">${service.category}</span>
                 </div>
-                <div class="service-rate">${service.rate}</div>
+                <div class="service-rate">${formatCurrency(service.rate)}</div>
                 <div class="service-range">Min: ${parseInt(service.min).toLocaleString()} - Max: ${parseInt(service.max).toLocaleString()}</div>
                 <div class="service-meta">
                     <div class="service-meta-item">
-                        <i class="fas fa-dollar-sign"></i>
-                        <span>Giá: $${service.rate}</span>
+                        <i class="fas ${showCurrency === 'VND' ? 'fa-dong-sign' : 'fa-dollar-sign'}"></i>
+                        <span class="price-text">Giá: ${formatCurrency(service.rate)}</span>
                     </div>
                     <div class="service-meta-item">
                         <i class="fas fa-arrow-up"></i>
@@ -365,13 +444,18 @@ function createServiceCard(service) {
 function updateStats() {
     const total = allServices.length;
     const visible = filteredServices.length;
-    const avgRate = filteredServices.length > 0 
+    const avgRateUSD = filteredServices.length > 0 
         ? (filteredServices.reduce((sum, service) => sum + parseFloat(service.rate), 0) / filteredServices.length).toFixed(2)
         : 0;
     
     totalServicesEl.textContent = total;
     visibleServicesEl.textContent = visible;
-    avgRateEl.textContent = avgRate;
+    
+    // Hiển thị giá trung bình theo đơn vị tiền tệ hiện tại
+    const avgRateText = showCurrency === 'VND' 
+        ? formatCurrency(avgRateUSD, 'VND') 
+        : '$' + avgRateUSD;
+    avgRateEl.innerHTML = avgRateText;
 }
 
 // Show error message
@@ -398,13 +482,46 @@ function debounce(func, wait) {
     };
 }
 
+// Toggle currency display
+function toggleCurrency() {
+    showCurrency = showCurrency === 'USD' ? 'VND' : 'USD';
+    renderServices();
+    updateStats();
+    updateCurrencyButton();
+    
+    // Lưu preference vào localStorage
+    localStorage.setItem('preferredCurrency', showCurrency);
+    
+    console.log('Chuyển đổi hiển thị tiền tệ sang:', showCurrency);
+}
+
+// Update currency button text
+function updateCurrencyButton() {
+    if (currencyTextEl) {
+        currencyTextEl.textContent = showCurrency === 'USD' ? 'VND → USD' : 'USD → VND';
+    }
+}
+
+// Load currency preference from localStorage
+function loadCurrencyPreference() {
+    const saved = localStorage.getItem('preferredCurrency');
+    if (saved && (saved === 'USD' || saved === 'VND')) {
+        showCurrency = saved;
+    }
+}
+
 // Export functions for potential external use
 window.APIUtils = {
     loadServices,
     applyFilters,
     clearAllFilters,
     switchView,
+    toggleCurrency,
+    formatCurrency,
+    convertUSDToVND,
     getFilteredServices: () => filteredServices,
     getAllServices: () => allServices,
-    getAPIConfig: () => API_CONFIG
+    getAPIConfig: () => API_CONFIG,
+    getCurrentCurrency: () => showCurrency,
+    getExchangeRate: () => usdToVndRate
 };
