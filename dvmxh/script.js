@@ -1,126 +1,5 @@
-// Sample data - trong thực tế sẽ lấy từ API
-const sampleServices = [
-    {
-        "service": 1,
-        "name": "Youtube views",
-        "type": "Default",
-        "category": "Youtube",
-        "rate": "2.5",
-        "min": "200",
-        "max": "10000",
-        "refill": true
-    },
-    {
-        "service": 2,
-        "name": "Facebook comments",
-        "type": "Custom Comments",
-        "category": "Facebook",
-        "rate": "4",
-        "min": "10",
-        "max": "1500",
-        "refill": false
-    },
-    {
-        "service": 3,
-        "name": "Instagram followers",
-        "type": "Premium",
-        "category": "Instagram",
-        "rate": "8.5",
-        "min": "100",
-        "max": "50000",
-        "refill": true
-    },
-    {
-        "service": 4,
-        "name": "TikTok likes",
-        "type": "Default",
-        "category": "TikTok",
-        "rate": "1.2",
-        "min": "50",
-        "max": "25000",
-        "refill": false
-    },
-    {
-        "service": 5,
-        "name": "Twitter retweets",
-        "type": "Custom Comments",
-        "category": "Twitter",
-        "rate": "3.8",
-        "min": "25",
-        "max": "10000",
-        "refill": true
-    },
-    {
-        "service": 6,
-        "name": "Youtube subscribers",
-        "type": "Premium",
-        "category": "Youtube",
-        "rate": "12.5",
-        "min": "10",
-        "max": "5000",
-        "refill": true
-    },
-    {
-        "service": 7,
-        "name": "Facebook page likes",
-        "type": "Default",
-        "category": "Facebook",
-        "rate": "6.0",
-        "min": "100",
-        "max": "20000",
-        "refill": false
-    },
-    {
-        "service": 8,
-        "name": "Instagram likes",
-        "type": "Default",
-        "category": "Instagram",
-        "rate": "2.1",
-        "min": "100",
-        "max": "15000",
-        "refill": true
-    },
-    {
-        "service": 9,
-        "name": "TikTok followers",
-        "type": "Premium",
-        "category": "TikTok",
-        "rate": "15.0",
-        "min": "50",
-        "max": "10000",
-        "refill": true
-    },
-    {
-        "service": 10,
-        "name": "Twitter followers",
-        "type": "Premium",
-        "category": "Twitter",
-        "rate": "18.5",
-        "min": "25",
-        "max": "8000",
-        "refill": false
-    },
-    {
-        "service": 11,
-        "name": "Youtube likes",
-        "type": "Default",
-        "category": "Youtube",
-        "rate": "1.8",
-        "min": "100",
-        "max": "50000",
-        "refill": true
-    },
-    {
-        "service": 12,
-        "name": "Facebook shares",
-        "type": "Custom Comments",
-        "category": "Facebook",
-        "rate": "5.2",
-        "min": "50",
-        "max": "12000",
-        "refill": false
-    }
-];
+// Sample data - đã xóa để test API thực
+const sampleServices = [];
 
 // API Configuration
 const API_CONFIG = {
@@ -131,8 +10,8 @@ const API_CONFIG = {
 };
 
 // Global variables
-let allServices = [...sampleServices];
-let filteredServices = [...sampleServices];
+let allServices = [];
+let filteredServices = [];
 let currentView = 'grid';
 let usdToVndRate = 24500; // Tỷ giá USD to VNĐ (có thể cập nhật từ API)
 let showCurrency = 'USD'; // 'USD' hoặc 'VND'
@@ -271,9 +150,10 @@ async function loadServices() {
         // Kiểm tra response có hợp lệ không
         if (data && Array.isArray(data)) {
             allServices = data;
+            console.log('API trả về', data.length, 'dịch vụ');
         } else {
-            console.warn('API response không đúng định dạng, sử dụng dữ liệu mẫu');
-            allServices = [...sampleServices];
+            console.warn('API response không đúng định dạng:', data);
+            allServices = [];
         }
         
         filteredServices = [...allServices];
@@ -287,14 +167,14 @@ async function loadServices() {
         console.error('Error loading services from API:', error);
         console.log('Sử dụng dữ liệu mẫu thay thế');
         
-        // Fallback to sample data nếu API lỗi
-        allServices = [...sampleServices];
-        filteredServices = [...allServices];
+        // Không có dữ liệu mẫu fallback
+        allServices = [];
+        filteredServices = [];
         
         renderServices();
         updateStats();
         
-        showError(`Không thể kết nối API: ${error.message}. Đang sử dụng dữ liệu mẫu.`);
+        showError(`Không thể kết nối API: ${error.message}. Vui lòng kiểm tra kết nối mạng và thử lại.`);
     } finally {
         loading.style.display = 'none';
     }
