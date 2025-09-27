@@ -9,6 +9,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles cho search box nếu cần */
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        .search-box input {
+            padding-left: 45px;
+        }
+
+        /* Responsive breakpoints tùy chỉnh */
+        @media (max-width: 576px) {
+            .filter-group label {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -18,60 +47,86 @@
         </header>
 
         <div class="controls">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Nhập tên dịch vụ cần tìm...">
+            <div class="row mb-3">
+                <!-- Search box full width trên mobile -->
+                <div class="col-12">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Nhập tên dịch vụ cần tìm..." class="form-control">
+                    </div>
+                </div>
             </div>
             
             <div class="filters">
-                <div class="filter-group">
-                    <label for="categoryFilter">Danh mục:</label>
-                    <select id="categoryFilter">
-                        <option value="">Tất cả</option>
-                        <option value="Youtube">Youtube</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="TikTok">TikTok</option>
-                        <option value="Twitter">Twitter</option>
-                    </select>
+                <div class="row g-2 mb-3">
+                    <!-- Mỗi filter group chiếm full width trên mobile, 1/2 trên tablet, 1/5 trên desktop -->
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <div class="filter-group">
+                            <label for="categoryFilter" class="form-label">Danh mục:</label>
+                            <select id="categoryFilter" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="Youtube">Youtube</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="Twitter">Twitter</option>
+                            </select>
+                        </div>
+                    </div>
+        
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <div class="filter-group">
+                            <label for="refillFilter" class="form-label">Bảo hành:</label>
+                            <select id="refillFilter" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="true">Có bảo hành</option>
+                                <option value="false">Không bảo hành</option>
+                            </select>
+                        </div>
+                    </div>
+        
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <div class="filter-group">
+                            <label for="rateFilter" class="form-label">Giá tối đa (VNĐ):</label>
+                            <input type="number" id="rateFilter" placeholder="Ví dụ: 1000000" step="1000" class="form-control">
+                        </div>
+                    </div>
+        
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <div class="filter-group">
+                            <label for="minFilter" class="form-label">Số lượng tối thiểu:</label>
+                            <input type="number" id="minFilter" placeholder="Ví dụ: 1000" class="form-control">
+                        </div>
+                    </div>
+        
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <div class="filter-group">
+                            <label for="maxFilter" class="form-label">Số lượng tối đa:</label>
+                            <input type="number" id="maxFilter" placeholder="Ví dụ: 50000" class="form-control">
+                        </div>
+                    </div>
                 </div>
-
-
-                <div class="filter-group">
-                    <label for="refillFilter">Bảo hành:</label>
-                    <select id="refillFilter">
-                        <option value="">Tất cả</option>
-                        <option value="true">Có bảo hành</option>
-                        <option value="false">Không bảo hành</option>
-                    </select>
+        
+                <!-- Buttons responsive -->
+                <div class="row g-2">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <button id="clearFilters" class="btn btn-secondary w-100">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <button id="toggleCurrency" class="btn btn-primary w-100">
+                            <i class="fas fa-exchange-alt"></i> <span id="currencyText">USD → VNĐ</span>
+                        </button>
+                    </div>
+                    
+                    <div class="col-12 col-sm-12 col-md-4">
+                        <button onclick="forceRefresh()" class="btn btn-secondary w-100">
+                            <i class="fas fa-sync-alt"></i> Làm mới
+                        </button>
+                    </div>
                 </div>
-
-                <div class="filter-group">
-                    <label for="rateFilter">Giá tối đa (VNĐ):</label>
-                    <input type="number" id="rateFilter" placeholder="Ví dụ: 1000000" step="1000">
-                </div>
-
-                <div class="filter-group">
-                    <label for="minFilter">Số lượng tối thiểu:</label>
-                    <input type="number" id="minFilter" placeholder="Ví dụ: 1000">
-                </div>
-
-                <div class="filter-group">
-                    <label for="maxFilter">Số lượng tối đa:</label>
-                    <input type="number" id="maxFilter" placeholder="Ví dụ: 50000">
-                </div>
-
-                <button id="clearFilters" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Xóa bộ lọc
-                </button>
-                
-                <button id="toggleCurrency" class="btn btn-primary">
-                    <i class="fas fa-exchange-alt"></i> <span id="currencyText">USD → VNĐ</span>
-                </button>
-                
-                <button onclick="forceRefresh()" class="btn btn-secondary">
-                    <i class="fas fa-sync-alt"></i> Làm mới
-                </button>
             </div>
         </div>
 
