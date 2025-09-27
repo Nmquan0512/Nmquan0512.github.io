@@ -121,7 +121,7 @@ function updateCategoryDropdowns() {
     
     // Get unique categories and types
     const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
-    const types = [...new Set(allServices.map(s => s.type).filter(Boolean))];
+    const types = [...new Set(allServices.map(s => s.type || s.service_type).filter(Boolean))];
     
     // Update category dropdown
     if (categoryFilter) {
@@ -230,9 +230,11 @@ async function loadServices() {
             
             // Debug: Log cấu trúc dữ liệu mẫu
             if (data.length > 0) {
-                console.log('Cấu trúc dịch vụ đầu tiên:', data[0]);
-                console.log('Các danh mục có sẵn:', [...new Set(data.map(s => s.category))]);
-                console.log('Các loại có sẵn:', [...new Set(data.map(s => s.type))]);
+                console.log('📋 Cấu trúc dịch vụ đầu tiên:', data[0]);
+                console.log('📂 Các danh mục có sẵn:', [...new Set(data.map(s => s.category))]);
+                console.log('🏷️ Các loại có sẵn (type):', [...new Set(data.map(s => s.type))]);
+                console.log('🏷️ Các loại có sẵn (service_type):', [...new Set(data.map(s => s.service_type))]);
+                console.log('🔍 Tất cả keys của dịch vụ đầu tiên:', Object.keys(data[0]));
             }
         } else {
             console.warn('API response không đúng định dạng:', data);
@@ -285,8 +287,8 @@ function applyFilters() {
             return false;
         }
         
-        // Type filter
-        if (type && service.type !== type) {
+        // Type filter - kiểm tra cả service.type và service.service_type
+        if (type && service.type !== type && service.service_type !== type) {
             return false;
         }
         
@@ -376,8 +378,8 @@ function createServiceCard(service) {
             <div class="service-info">
                 <h3 class="service-name">${service.name}</h3>
                 <div class="service-badges">
-                    <span class="service-type">${service.type}</span>
-                    <span class="service-category">${service.category}</span>
+                    <span class="service-type">${service.type || service.service_type || 'N/A'}</span>
+                    <span class="service-category">${service.category || 'N/A'}</span>
                 </div>
                 <div class="service-rate">${formatCurrency(service.rate)}</div>
                 <div class="service-range">Min: ${parseInt(service.min).toLocaleString()} - Max: ${parseInt(service.max).toLocaleString()}</div>
