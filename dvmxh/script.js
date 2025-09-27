@@ -43,12 +43,25 @@ function convertUSDToVND(usdAmount) {
 
 function formatCurrency(amount, currency = showCurrency) {
     const numAmount = parseFloat(amount);
+    // Thêm markup 25% cho giá
+    const markupAmount = numAmount * 1.25;
+    
     if (currency === 'VND') {
-        const vndAmount = convertUSDToVND(numAmount);
+        const vndAmount = convertUSDToVND(markupAmount);
         return vndAmount.toLocaleString('vi-VN') + ' ₫';
     } else {
-        return '$' + numAmount.toFixed(2);
+        return '$' + markupAmount.toFixed(2);
     }
+}
+
+// Function để lấy giá gốc (không markup) - dùng cho thống kê
+function getOriginalPrice(amount) {
+    return parseFloat(amount);
+}
+
+// Function để lấy giá có markup
+function getMarkupPrice(amount) {
+    return parseFloat(amount) * 1.25;
 }
 
 function getCurrencySymbol(currency = showCurrency) {
@@ -79,6 +92,45 @@ function updateExchangeRateDisplay() {
     if (exchangeRateEl) {
         exchangeRateEl.textContent = `1 USD = ${usdToVndRate.toLocaleString('vi-VN')} ₫`;
     }
+}
+
+// Update category and type dropdowns from API data
+function updateCategoryDropdowns() {
+    if (allServices.length === 0) return;
+    
+    // Get unique categories and types
+    const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
+    const types = [...new Set(allServices.map(s => s.type).filter(Boolean))];
+    
+    // Update category dropdown
+    if (categoryFilter) {
+        const currentValue = categoryFilter.value;
+        categoryFilter.innerHTML = '<option value="">Tất cả</option>';
+        
+        categories.sort().forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            if (category === currentValue) option.selected = true;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    // Update type dropdown
+    if (typeFilter) {
+        const currentValue = typeFilter.value;
+        typeFilter.innerHTML = '<option value="">Tất cả</option>';
+        
+        types.sort().forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            if (type === currentValue) option.selected = true;
+            typeFilter.appendChild(option);
+        });
+    }
+    
+    console.log('Đã cập nhật dropdown với', categories.length, 'danh mục và', types.length, 'loại');
 }
 
 // Initialize app
@@ -151,6 +203,13 @@ async function loadServices() {
         if (data && Array.isArray(data)) {
             allServices = data;
             console.log('API trả về', data.length, 'dịch vụ');
+            
+            // Debug: Log cấu trúc dữ liệu mẫu
+            if (data.length > 0) {
+                console.log('Cấu trúc dịch vụ đầu tiên:', data[0]);
+                console.log('Các danh mục có sẵn:', [...new Set(data.map(s => s.category))]);
+                console.log('Các loại có sẵn:', [...new Set(data.map(s => s.type))]);
+            }
         } else {
             console.warn('API response không đúng định dạng:', data);
             allServices = [];
@@ -158,6 +217,7 @@ async function loadServices() {
         
         filteredServices = [...allServices];
         
+        updateCategoryDropdowns();
         renderServices();
         updateStats();
         
@@ -211,8 +271,8 @@ function applyFilters() {
             return false;
         }
         
-        // Rate filter (less than or equal to max rate)
-        if (parseFloat(service.rate) > maxRate) {
+        // Rate filter (less than or equal to max rate) - sử dụng giá có markup
+        if (getMarkupPrice(service.rate) > maxRate) {
             return false;
         }
         
@@ -324,8 +384,10 @@ function createServiceCard(service) {
 function updateStats() {
     const total = allServices.length;
     const visible = filteredServices.length;
+    
+    // Tính giá trung bình có markup
     const avgRateUSD = filteredServices.length > 0 
-        ? (filteredServices.reduce((sum, service) => sum + parseFloat(service.rate), 0) / filteredServices.length).toFixed(2)
+        ? (filteredServices.reduce((sum, service) => sum + getMarkupPrice(service.rate), 0) / filteredServices.length).toFixed(2)
         : 0;
     
     totalServicesEl.textContent = total;
@@ -399,6 +461,9 @@ window.APIUtils = {
     toggleCurrency,
     formatCurrency,
     convertUSDToVND,
+    getMarkupPrice,
+    getOriginalPrice,
+    updateCategoryDropdowns,
     getFilteredServices: () => filteredServices,
     getAllServices: () => allServices,
     getAPIConfig: () => API_CONFIG,
