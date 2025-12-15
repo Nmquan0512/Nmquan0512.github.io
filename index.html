@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Locket Gold  - Nmquan</title>
+    <title>Locket Gold - Nmquan</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -768,7 +768,6 @@
 <body>
     <div class="container">
         <div class="glass-card">
-            <!-- App Header -->
             <div class="app-header">
                 <div class="app-icon-container">
                     <div class="app-icon">
@@ -783,7 +782,6 @@
                 </div>
             </div>
 
-            <!-- Smart Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="downloads">12.8K</div>
@@ -795,7 +793,6 @@
                 </div>
             </div>
 
-            <!-- Device Detection -->
             <div class="device-panel" id="devicePanel">
                 <div class="device-icon" id="deviceIcon">📱</div>
                  <div class="device-info">
@@ -804,7 +801,6 @@
                  </div>
             </div>
 
-            <!-- Download Section -->
             <div class="download-section">
                 <div class="url-container">
                     <input type="text" class="download-url" id="downloadUrl" 
@@ -820,7 +816,6 @@
                 </button>
             </div>
 
-            <!-- Navigation -->
             <div class="nav-links">
 
                 <a href="https://zalo.me/0968596808" class="nav-link" onclick="showSupport()">
@@ -831,19 +826,16 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">Đang tải...</div>
     </div>
 
-    <!-- Toast Notification -->
     <div class="toast" id="toast">
         <span id="toastIcon">✅</span>
         <span id="toastMessage">Thành công!</span>
     </div>
 
-    <!-- Safari Browser Warning -->
     <div class="safari-warning" id="safariWarning">
         <div class="safari-warning-card">
             <div class="safari-warning-icon">🦁</div>
@@ -880,54 +872,48 @@
         function hideSafariWarning() {
             const safariWarning = document.getElementById('safariWarning');
             safariWarning.classList.remove('show');
-            // Store preference to not show again in this session
             sessionStorage.setItem('safariWarningDismissed', 'true');
-            // Show confirmation toast
             showToast('✅', 'Bạn có thể tiếp tục sử dụng ứng dụng');
         }
 
         function checkSafariRequirement() {
-            // Don't show warning if already dismissed in this session
             if (sessionStorage.getItem('safariWarningDismissed') === 'true') {
                 return;
             }
 
-            // Show warning if not Safari
             if (!isSafariBrowser()) {
-                // Delay showing warning to allow page to load
                 setTimeout(() => {
                     showSafariWarning();
                 }, 1500);
             }
         }
 
-        // Enhanced Device Detection
+        // --- ĐÃ CHỈNH SỬA: Loại bỏ logic báo lỗi thiết bị ---
         function detectDevice() {
             const userAgent = navigator.userAgent.toLowerCase();
             const devicePanel = document.getElementById('devicePanel');
             const deviceIcon = document.getElementById('deviceIcon');
             const deviceType = document.getElementById('deviceType');
             
+            // Luôn hiển thị trạng thái tích cực để tránh nhận diện sai
              if (/iphone|ipad|ipod/.test(userAgent)) {
                  deviceIcon.textContent = '📱';
                  deviceType.textContent = 'iPhone/iPad iOS - Tương thích ✓';
                  devicePanel.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+             } else if (/mac/.test(userAgent) && 'ontouchend' in document) {
+                 // Đây là iPad Pro/Air chạy iPadOS hiển thị dạng Desktop
+                 deviceIcon.textContent = '📱';
+                 deviceType.textContent = 'iPadOS (Desktop Mode) - Tương thích ✓';
+                 devicePanel.style.background = 'linear-gradient(135deg, #10b981, #059669)';
              } else if (/android/.test(userAgent)) {
                  deviceIcon.textContent = '🤖';
-                 deviceType.textContent = 'Android - Hỗ trợ hạn chế';
+                 deviceType.textContent = 'Android - Đang xử lý...';
                  devicePanel.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-             } else if (/windows/.test(userAgent)) {
-                 deviceIcon.textContent = '💻';
-                 deviceType.textContent = 'Windows PC - Dùng iOS Simulator';
-                 devicePanel.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
-             } else if (/mac/.test(userAgent)) {
-                 deviceIcon.textContent = '💻';
-                 deviceType.textContent = 'macOS - Dùng Xcode Simulator';
-                 devicePanel.style.background = 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
              } else {
-                 deviceIcon.textContent = '❓';
-                 deviceType.textContent = 'Thiết bị không xác định';
-                 devicePanel.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+                 // Các trường hợp khác (PC, Mac, Laptop)
+                 deviceIcon.textContent = '💻';
+                 deviceType.textContent = 'Sẵn sàng cài đặt';
+                 devicePanel.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
              }
         }
 
@@ -935,22 +921,16 @@
         async function copyUrl() {
             const urlInput = document.getElementById('downloadUrl');
             const copyButton = document.querySelector('.copy-button');
-            
-            // Create the full itms-services URL for copying
             const fullUrl = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
             
              try {
                  await navigator.clipboard.writeText(fullUrl);
                  showToast('✅', 'Đã sao chép URL thành công!');
-                 
-                 // Button feedback
                  copyButton.style.transform = 'scale(0.9)';
                  setTimeout(() => {
                      copyButton.style.transform = 'scale(1)';
                  }, 150);
-                 
              } catch (err) {
-                 // Fallback
                  const textArea = document.createElement('textarea');
                  textArea.value = fullUrl;
                  document.body.appendChild(textArea);
@@ -961,34 +941,27 @@
              }
         }
 
-        // Smart Download Function
+        // --- ĐÃ CHỈNH SỬA: Loại bỏ chặn tải xuống ---
         function downloadApp() {
             const loadingOverlay = document.getElementById('loadingOverlay');
-            const userAgent = navigator.userAgent.toLowerCase();
             
-            // Check if Safari warning is active and not dismissed
+            // Vẫn cảnh báo Safari nếu cần, nhưng không chặn hoàn toàn
             if (!isSafariBrowser() && sessionStorage.getItem('safariWarningDismissed') !== 'true') {
-                showToast('⚠️', 'Vui lòng sử dụng Safari để tải ứng dụng');
-                return;
+                showToast('⚠️', 'Khuyên dùng Safari để cài đặt ổn định');
             }
             
-            // Show loading
             loadingOverlay.classList.add('show');
             
             setTimeout(() => {
                 loadingOverlay.classList.remove('show');
                 
-                 if (/iphone|ipad|ipod/.test(userAgent)) {
-                     // iOS - Try to open IPA installer
-                     window.location.href = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
-                     showToast('🚀', 'Đang bắt đầu cài đặt iOS...');
-                     updateDownloadCount();
-                 } else if (/android/.test(userAgent)) {
-                     showToast('⚠️', 'Hỗ trợ Android sắp ra mắt!');
-                 } else {
-                     showToast('💡', 'Vui lòng sử dụng thiết bị iOS để cài đặt');
-                 }
-            }, 2000);
+                // Kích hoạt link cài đặt bất kể thiết bị là gì
+                // Điều này giải quyết vấn đề iPad bị nhận diện nhầm là Mac
+                window.location.href = 'itms-services://?action=download-manifest&url=https%3A%2F%2Fnmquan0512.github.io%2Fmanifest.plist';
+                
+                showToast('🚀', 'Đang yêu cầu cài đặt...');
+                updateDownloadCount();
+            }, 1000);
         }
 
         // Toast Notification System
@@ -1019,8 +992,6 @@
             const current = parseFloat(downloadEl.textContent);
             const newCount = (current + 0.1).toFixed(1);
             downloadEl.textContent = newCount + 'K';
-            
-            // Animation
             downloadEl.style.transform = 'scale(1.2)';
             downloadEl.style.color = 'var(--accent)';
             setTimeout(() => {
@@ -1029,23 +1000,15 @@
             }, 600);
         }
 
-
-
-
-
          function showSupport() {
              showToast('💬', 'Hỗ trợ: 0968596808');
          }
 
         // Enhanced Page Initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Check Safari requirement first
             checkSafariRequirement();
-            
-            // Detect device
             detectDevice();
             
-            // Add smooth interactions
             const interactiveElements = document.querySelectorAll('button, .nav-link, .stat-card');
             interactiveElements.forEach(element => {
                 element.addEventListener('mouseenter', function() {
@@ -1053,7 +1016,6 @@
                 });
             });
             
-            // Simulate real-time stats
             setInterval(() => {
                 if (Math.random() > 0.8) {
                     const views = document.getElementById('rating');
@@ -1064,13 +1026,11 @@
                 }
             }, 15000);
             
-            // Auto-focus URL for easy copying
             document.getElementById('downloadUrl').addEventListener('click', function() {
                 this.select();
             });
         });
 
-         // Add keyboard shortcuts
          document.addEventListener('keydown', function(e) {
              if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement.id === 'downloadUrl') {
                  setTimeout(() => showToast('✅', 'Đã sao chép URL!'), 100);
